@@ -1,0 +1,38 @@
+# torrc-gateway.example - run Tor ONCE on your Proxmox host / gateway (.1)
+# Keeps your existing onion + adds SSH for .1-.4
+# Copy into /etc/tor/torrc on the gateway, replace 17.216.3.x with your real LAN IPs.
+#
+# Your existing working service:
+#   iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion:8006 -> Proxmox web
+# After this:
+#   same .onion:2221 -> 17.216.3.1:22  (machine .1 ssh)
+#   same .onion:2222 -> 17.216.3.2:22  (machine .2 ssh)
+#   same .onion:2223 -> 17.216.3.3:22
+#   same .onion:2224 -> 17.216.3.4:22
+#   same .onion:8006 -> 17.216.3.1:8006 (keep existing Proxmox web)
+
+HiddenServiceDir /var/lib/tor/proxmox_gateway/
+HiddenServicePort 8006 17.216.3.1:8006
+HiddenServicePort 2221 17.216.3.1:22
+HiddenServicePort 2222 17.216.3.2:22
+HiddenServicePort 2223 17.216.3.3:22
+HiddenServicePort 2224 17.216.3.4:22
+
+SocksPort 127.0.0.1:9050
+
+# If Tor is censored on the gateway, uncomment + fill your bridge:
+#UseBridges 1
+#Bridge obfs4 <IP:PORT> <FINGERPRINT> cert=... iat-mode=...
+
+# Apply:
+#   sudo systemctl restart tor
+#   sudo cat /var/lib/tor/proxmox_gateway/hostname
+#   sudo systemctl enable --now tor
+#
+# PuTTY client (Tor Browser open = SOCKS 127.0.0.1:9150):
+#   Connection > Proxy > SOCKS5 127.0.0.1 9150, DNS at proxy = Yes
+#   Session > Host: iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion
+#   Port: 2221 (.1) / 2222 (.2) / 2223 (.3) / 2224 (.4) / 8006 (web in Tor Browser)
+#
+# Better long-term: run setup-tor-ssh.sh inside EACH VM so each gets its own .onion:22.
+# Then you don't share one onion for all machines.
