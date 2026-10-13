@@ -1,0 +1,30 @@
+ubuntukit - paste-and-run (no editing)
+
+OPTION A - each machine gets its own onion (run INSIDE each Ubuntu VM, Proxmox console):
+  curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
+  sudo bash setup-tor-ssh.sh
+  sudo cat /var/lib/tor/ssh_hidden_service/hostname
+  Keys auto-fetch from https://github.com/Catgirlmp3.keys
+
+OPTION B - one onion for all machines (run ONCE on gateway .1, re-run after adding .5/.6):
+  curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-gateway.sh -o setup-tor-gateway.sh
+  sudo bash setup-tor-gateway.sh
+  sudo cat /var/lib/tor/proxmox_gateway/hostname
+  Existing :8006 mapping is kept. New SSH hosts get next free port 2221, 2222...
+
+VERIFY (on server):
+  systemctl is-active tor ssh ubuntukit
+  sudo journalctl -u ubuntukit -n 20 --no-pager
+  Proxmox web -> VM Options -> Start at boot = Yes
+
+CONNECT FROM WINDOWS (PuTTY):
+  1. Open Tor Browser (gives SOCKS 127.0.0.1:9150)
+  2. PuTTY > Connection > Proxy > SOCKS5, 127.0.0.1, 9150, DNS at proxy = Yes
+  3. PuTTY > Session > Host = <your-xyz.onion>, Port = 22 (Option A) or 2221/2222/2223/2224 (Option B)
+  4. SSH > Auth > your .ppk key > Open
+
+FULL MANUAL (all files at once):
+  curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
+  curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/agent.py -o agent.py
+  curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/ubuntukit.service -o ubuntukit.service
+  sudo bash setup-tor-ssh.sh
