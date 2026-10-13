@@ -1,0 +1,22 @@
+[Unit]
+Description=ubuntukit local maintenance service (own Proxmox Ubuntu VM)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntukit
+Group=nogroup
+ExecStart=/usr/bin/python3 /opt/ubuntukit/agent.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/ubuntukit
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
