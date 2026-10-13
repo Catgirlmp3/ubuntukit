@@ -3,14 +3,18 @@
 # Uses only standard tools: OpenSSH + Tor onion service. No custom RCE daemon.
 #
 # Upload this + agent.py + ubuntukit.service to a public GitHub repo,
-# then on the VM (Proxmox console):
-#   curl -fsSL https://raw.githubusercontent.com/<YOU>/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
-#   sudo bash setup-tor-ssh.sh 'ssh-ed25519 AAA... your-key-comment'
+# then on the VM (Proxmox console) - same command on EVERY machine, no editing:
+#   curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
+#   sudo bash setup-tor-ssh.sh
 #
-# If you omit the key argument, password login stays enabled so you don't lock yourself out.
+# Keys auto-fetch from https://github.com/Catgirlmp3.keys (zero-edit).
+# Optional override: sudo bash setup-tor-ssh.sh 'ssh-ed25519 AAA...'
+#
+# If no key is found, password login stays enabled so you don't lock yourself out.
 set -euo pipefail
 
-PUBKEY="${1:-}"
+GITHUB_USER="Catgirlmp3"
+PUBKEY_ARG="${1:-}"
 TARGET_USER="${SUDO_USER:-$USER}"
 if [ "$TARGET_USER" = "root" ]; then TARGET_USER="ubuntu"; fi
 
@@ -42,19 +46,33 @@ systemctl enable --now tor
 systemctl restart tor
 sleep 5
 
-echo "[3/5] Installing SSH key (if provided)..."
-if [ -n "$PUBKEY" ]; then
+echo "[3/5] Installing SSH keys (auto-fetch from GitHub, no edit)..."
+KEYS_TMP="$(mktemp)"
+if [ -n "$PUBKEY_ARG" ]; then
+  echo "$PUBKEY_ARG" > "$KEYS_TMP"
+else
+  if curl -fsSL "https://github.com/$GITHUB_USER.keys" -o "$KEYS_TMP" 2>/dev/null && [ -s "$KEYS_TMP" ]; then
+    echo "Fetched keys for $GITHUB_USER."
+  else
+    echo "WARN: could not fetch https://github.com/$GITHUB_USER.keys, leaving passwords on."
+    : > "$KEYS_TMP"
+  fi
+fi
+if [ -s "$KEYS_TMP" ]; then
   UHOME=$(eval echo "~$TARGET_USER")
   mkdir -p "$UHOME/.ssh"
   chmod 700 "$UHOME/.ssh"
   touch "$UHOME/.ssh/authorized_keys"
   chmod 600 "$UHOME/.ssh/authorized_keys"
   chown -R "$TARGET_USER:$TARGET_USER" "$UHOME/.ssh"
-  if ! grep -qF "$PUBKEY" "$UHOME/.ssh/authorized_keys"; then
-    echo "$PUBKEY" >> "$UHOME/.ssh/authorized_keys"
-  fi
-  echo "Key installed for $TARGET_USER."
-  echo "[4/5] Hardening SSH (key-only, safe because key is installed)..."
+  while IFS= read -r k || [ -n "$k" ]; do
+    [ -z "$k" ] && continue
+    if ! grep -qF "$k" "$UHOME/.ssh/authorized_keys"; then
+      echo "$k" >> "$UHOME/.ssh/authorized_keys"
+    fi
+  done < "$KEYS_TMP"
+  echo "Keys installed for $TARGET_USER."
+  echo "[4/5] Hardening SSH (key-only, safe because keys are installed)..."
   mkdir -p /etc/ssh/sshd_config.d
   cat > /etc/ssh/sshd_config.d/99-local-hardening.conf <<'EOF'
 PubkeyAuthentication yes
@@ -64,9 +82,10 @@ ChallengeResponseAuthentication no
 EOF
   sshd -t && systemctl reload ssh
 else
-  echo "No pubkey passed - leaving password login ON so you don't lock yourself out."
-  echo "After you ssh in once, re-run: sudo bash setup-tor-ssh.sh 'ssh-ed25519 AAA...'"
+  echo "No pubkey found - leaving password login ON so you don't lock yourself out."
+  echo "Add a key to https://github.com/$GITHUB_USER.keys then re-run: sudo bash setup-tor-ssh.sh"
 fi
+rm -f "$KEYS_TMP"
 
 echo "[4/5] Installing ubuntukit persistent service (local-only, no network)..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
