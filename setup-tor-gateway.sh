@@ -131,5 +131,5 @@ echo ""
 echo "Active mappings:"
 grep -E "^HiddenServicePort" "$TORRC" || true
 echo ""
-echo "PuTTY: SOCKS5 127.0.0.1:9150 (Tor Browser open), Host=<onion>, Port=<vport above>"
+echo "PuTTY: SOCKS5 127.0.0.1:9150 (Tor Browser open), Host=iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion, Port=<vport above> (2221=.1, 2222=.2, 2223=.3, 2224=.4, 8006=web)"
 echo "Re-run this same script after adding a new machine (.5, .6...) - it only adds the new one."

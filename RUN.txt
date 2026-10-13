@@ -17,10 +17,19 @@ VERIFY (on server):
   sudo journalctl -u ubuntukit -n 20 --no-pager
   Proxmox web -> VM Options -> Start at boot = Yes
 
+GATEWAY ONION (your working one, keep private):
+  iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion
+  :8006 -> 17.216.3.1:8006 (Proxmox web, existing, Tor Browser)
+  :2221 -> 17.216.3.1:22 (machine .1 ssh)
+  :2222 -> 17.216.3.2:22 (machine .2 ssh)
+  :2223 -> 17.216.3.3:22
+  :2224 -> 17.216.3.4:22
+
 CONNECT FROM WINDOWS (PuTTY):
   1. Open Tor Browser (gives SOCKS 127.0.0.1:9150)
   2. PuTTY > Connection > Proxy > SOCKS5, 127.0.0.1, 9150, DNS at proxy = Yes
-  3. PuTTY > Session > Host = <your-xyz.onion>, Port = 22 (Option A) or 2221/2222/2223/2224 (Option B)
+  3. PuTTY > Session > Host = iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion
+     Port = 22 (Option A, per-machine onion) or 2221/2222/2223/2224 (Option B, gateway above)
   4. SSH > Auth > your .ppk key > Open
 
 FULL MANUAL (all files at once):
