@@ -15,11 +15,12 @@ OPTION B - one onion for all machines (run ONCE on gateway .1, re-run after addi
 REMOTE BOOTSTRAP (away from home, single onion, your flow):
   1. PC: Tor Browser open + PuTTY tunnel -> 127.0.0.1:8006 -> primary Proxmox web (existing).
   2. Windows VM browser: http://172.16.3.2:8006 (then .3, .4) -> target Proxmox -> Shell.
-  3. In target Shell, paste (enables SSH + keys, no editing):
-       curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
-       sudo bash setup-tor-ssh.sh
-  4. Back on .1 Shell, re-run: sudo bash setup-tor-gateway.sh
-     (picks up the new box as next free port 2222/2223..., keeps :8006).
+  3. In target Shell paste ONE line (Proxmox hosts get keys-only for root;
+     no SSH policy, no reboot, workers unaffected):
+       curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh | sudo bash
+  4. Back on .1 Shell paste ONE line (picks up the new box as next free
+     port 2222/2223..., keeps :8006):
+       curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-gateway.sh | sudo bash
   5. PC PuTTY direct: Host=iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion Port=2222 (.2) etc.
 
 VERIFY (on server):
