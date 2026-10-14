@@ -53,3 +53,11 @@ SHARED ROOT NOTE:
   can still stop, read, or remove ubuntukit - that is how Linux works.
   Real protection = machine they don't administer (separate VM/host),
   or Proxmox roles instead of full root. Ask before adding stealth.
+
+WORKERS-SAFE PLACEMENT (no interference with workers):
+  Run gateway + ubuntukit in YOUR OWN dedicated Ubuntu VM (e.g. mgmt VM
+  on .1, 1 vCPU / 1 GB / 8 GB disk). Workers' VMs and Proxmox hosts stay
+  untouched: no reboots of their machines, no firewall/API/role changes,
+  no new entries in their views. Footprint is ~nothing (60s health tick).
+  The mgmt VM appears in the VM list like any other VM - that is normal.
+  Gateway forwarding only connects to already-open :22/:8006 services.
