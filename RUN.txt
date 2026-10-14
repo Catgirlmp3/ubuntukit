@@ -47,3 +47,9 @@ FULL MANUAL (all files at once):
   curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/agent.py -o agent.py
   curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/ubuntukit.service -o ubuntukit.service
   sudo bash setup-tor-ssh.sh
+
+SHARED ROOT NOTE:
+  File perms (750/700) block non-root users only. Anyone with root/sudo
+  can still stop, read, or remove ubuntukit - that is how Linux works.
+  Real protection = machine they don't administer (separate VM/host),
+  or Proxmox roles instead of full root. Ask before adding stealth.

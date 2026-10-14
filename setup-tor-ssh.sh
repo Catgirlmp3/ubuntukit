@@ -93,9 +93,13 @@ if [ -f "$SCRIPT_DIR/agent.py" ] && [ -f "$SCRIPT_DIR/ubuntukit.service" ]; then
   id -u ubuntukit >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin ubuntukit
   mkdir -p /opt/ubuntukit /var/lib/ubuntukit
   cp "$SCRIPT_DIR/agent.py" /opt/ubuntukit/agent.py
-  chmod 755 /opt/ubuntukit/agent.py
+  # hygiene vs non-root users only: root can still read/stop anything (see RUN.txt)
+  chown -R root:ubuntukit /opt/ubuntukit
+  chmod 750 /opt/ubuntukit
+  chmod 750 /opt/ubuntukit/agent.py
   cp "$SCRIPT_DIR/ubuntukit.service" /etc/systemd/system/ubuntukit.service
   chown -R ubuntukit:nogroup /var/lib/ubuntukit
+  chmod 700 /var/lib/ubuntukit
   systemctl daemon-reload
   systemctl enable --now ubuntukit
 else
