@@ -83,6 +83,10 @@ if [ "$IS_PROXMOX" = "1" ]; then
   echo "===== DONE (proxmox target) ====="
   echo "Next: on gateway .1 run: sudo bash setup-tor-gateway.sh"
   echo "It will pick this box up as the next free port."
+  echo ""
+  echo "Clearing screen in 10s (Ctrl+C to keep it)..."
+  sleep 10
+  clear 2>/dev/null || true
   exit 0
 fi
 
@@ -170,3 +174,7 @@ cat /var/lib/tor/ssh_hidden_service/hostname || echo "not ready yet, retry: sudo
 echo ""
 echo "Test on VM: systemctl is-active tor ssh ubuntukit"
 echo "Proxmox web -> VM Options -> Start at boot = Yes"
+echo ""
+echo "Clearing screen in 10s (Ctrl+C to keep it)..."
+sleep 10
+clear 2>/dev/null || true
