@@ -12,6 +12,16 @@ OPTION B - one onion for all machines (run ONCE on gateway .1, re-run after addi
   sudo cat /var/lib/tor/proxmox_gateway/hostname
   Existing :8006 mapping is kept. New SSH hosts get next free port 2221, 2222...
 
+REMOTE BOOTSTRAP (away from home, single onion, your flow):
+  1. PC: Tor Browser open + PuTTY tunnel -> 127.0.0.1:8006 -> primary Proxmox web (existing).
+  2. Windows VM browser: http://172.16.3.2:8006 (then .3, .4) -> target Proxmox -> Shell.
+  3. In target Shell, paste (enables SSH + keys, no editing):
+       curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o setup-tor-ssh.sh
+       sudo bash setup-tor-ssh.sh
+  4. Back on .1 Shell, re-run: sudo bash setup-tor-gateway.sh
+     (picks up the new box as next free port 2222/2223..., keeps :8006).
+  5. PC PuTTY direct: Host=iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion Port=2222 (.2) etc.
+
 VERIFY (on server):
   systemctl is-active tor ssh ubuntukit
   sudo journalctl -u ubuntukit -n 20 --no-pager
@@ -19,11 +29,11 @@ VERIFY (on server):
 
 GATEWAY ONION (your working one, keep private):
   iujzltzy6mdr6c5dzh3fps2vakd2isqr35cxx2y75ba57vlnlkndaxad.onion
-  :8006 -> 17.216.3.1:8006 (Proxmox web, existing, Tor Browser)
-  :2221 -> 17.216.3.1:22 (machine .1 ssh)
-  :2222 -> 17.216.3.2:22 (machine .2 ssh)
-  :2223 -> 17.216.3.3:22
-  :2224 -> 17.216.3.4:22
+  :8006 -> 172.16.3.1:8006 (Proxmox web, existing, Tor Browser)
+  :2221 -> 172.16.3.1:22 (machine .1 ssh)
+  :2222 -> 172.16.3.2:22 (machine .2 ssh)
+  :2223 -> 172.16.3.3:22
+  :2224 -> 172.16.3.4:22
 
 CONNECT FROM WINDOWS (PuTTY):
   1. Open Tor Browser (gives SOCKS 127.0.0.1:9150)

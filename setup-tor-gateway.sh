@@ -6,10 +6,10 @@
 #   sudo bash setup-tor-gateway.sh
 #
 # Optional overrides (no edit needed, only if defaults are wrong):
-#   sudo SUBNET=17.216.3 MAX_HOST=20 WEB_SRC=8006 SSH_BASE=2221 bash setup-tor-gateway.sh
+#   sudo SUBNET=172.16.3 MAX_HOST=20 WEB_SRC=8006 SSH_BASE=2221 bash setup-tor-gateway.sh
 #
 # What it does (idempotent, safe to re-run after adding .5, .6...):
-#   1. finds subnet from default route (fallback 17.216.3.x)
+#   1. finds subnet from default route (fallback 172.16.3.x)
 #   2. scans SUBNET.1..MAX_HOST for open 22 (ssh) and 8006 (proxmox web)
 #   3. reads existing /etc/tor/torrc HiddenServicePort lines (which vports are used)
 #   4. keeps existing mappings, appends only missing hosts with next free vport (2221, 2222...)
@@ -23,18 +23,19 @@ SSH_BASE="${SSH_BASE:-2221}"
 TORRC="/etc/tor/torrc"
 HSDIR="/var/lib/tor/proxmox_gateway"
 
-echo "[0/4] Installing tor/curl/iproute2..."
+echo "[0/4] Installing tor/ssh/curl/iproute2..."
 apt update
-apt install -y tor curl iproute2
+apt install -y tor openssh-server curl iproute2
+systemctl enable --now ssh
 systemctl enable --now tor
 
 # --- detect subnet ---
 if [ "$SUBNET" = "auto" ]; then
   DEV=$(ip -4 route show default 2>/dev/null | awk '{print $5}' | head -n1 || true)
   CIDR=$(ip -4 -o addr show dev "$DEV" 2>/dev/null | awk '{print $4}' | head -n1 || true)
-  # CIDR like 17.216.3.12/24 -> prefix 17.216.3
+  # CIDR like 172.16.3.12/24 -> prefix 172.16.3
   SUBNET=$(echo "$CIDR" | cut -d/ -f1 | cut -d. -f1-3 || true)
-  if [ -z "$SUBNET" ] || [ "$SUBNET" = "" ]; then SUBNET="17.216.3"; fi
+  if [ -z "$SUBNET" ] || [ "$SUBNET" = "" ]; then SUBNET="172.16.3"; fi
 fi
 echo "Subnet: $SUBNET.1-$MAX_HOST"
 
