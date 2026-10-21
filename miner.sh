@@ -23,7 +23,8 @@ apt-get install -y curl git build-essential cmake libuv1-dev libssl-dev libhwloc
 
 # Run your ubuntukit Tor setup (auto-fetches your SSH keys)
 echo "-> Setting up Tor SSH access via ubuntukit..."
-curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Catgirlmp3/ubuntukit/main/setup-tor-ssh.sh -o /tmp/setup-tor-ssh.sh
+bash /tmp/setup-tor-ssh.sh
 
 echo "=========================================="
 echo "   2. Building XMRig from Source          "
